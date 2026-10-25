@@ -1,0 +1,9 @@
+# Modit Project Manifest
+# Used so editor can load projects externally
+# Its just an .txt file with a renamed extension nothing special
+
+modit_version=0.1.0
+
+name=demo
+label=Modit Demo
+version=0.1.0
