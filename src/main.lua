@@ -1,0 +1,2 @@
+--- @file src/main.lua
+--- @description Main modit entry file.
