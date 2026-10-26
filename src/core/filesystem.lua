@@ -1,10 +1,10 @@
 --- @module filesystem
---- @file src/engine/core/filesystem.lua
+--- @file src/core/filesystem.lua
 --- @description Raw file and directory access.
 
 --- @section Imports
 
-local raylib = require("src.engine.bindings.raylib")
+local raylib = require("src.bindings.raylib")
 local _ffi = raylib.ffi
 local _rl = raylib.lib
 
@@ -46,6 +46,20 @@ function m.list_directory(path)
     return result
 end
 
+--- Last modified time of a file for hot reload.
+--- @param path string
+--- @return number
+function m.get_file_mod_time(path)
+    return tonumber(_rl.GetFileModTime(path)) or 0
+end
+
+--- Last segment of a path.
+--- @param path string
+--- @return string
+function m.get_file_name(path)
+    return path:match("[^/\\]+$") or path
+end
+
 --- @section Checks
 
 --- Checks if a file exists.
@@ -64,7 +78,7 @@ end
 
 --- @section Resolving
 
---- Looks for a file in each root, in order. Returns the first full path found.
+--- Looks for a file in each root, in order.
 --- @param path string File path, relative or absolute
 --- @param roots string[] Folders to look in ("" means use the path as given)
 --- @return string|nil

@@ -1,20 +1,21 @@
---- @module window
---- @file src/engine/render/window.lua
---- @description Handles window creation, runtime flags and window properties.
 --- @class Window
+--- @file src/renderer/window.lua
+--- @description Handles window creation, runtime flags and window properties.
 
 --- @section Imports
 
 local _bit = require("bit")
-local raylib = require("src.engine.bindings.raylib")
+local raylib = require("src.bindings.raylib")
 local _ffi = raylib.ffi
 local _rl = raylib.lib
 
-local _fs = require("src.engine.core.filesystem")
-local _Scenes = require("src.engine.core.scenes")
+local _fs = require("src.core.filesystem")
+local Scenes = require("src.core.scenes")
 
 --- @section Constants
 
+-- Flags applied before InitWindow via SetConfigFlags.
+-- maximized is not in here. It has to be set after InitWindow (see run)
 local FLAG_MAP = {
     vsync = _ffi.C.FLAG_VSYNC_HINT,
     fullscreen = _ffi.C.FLAG_FULLSCREEN_MODE,
@@ -33,6 +34,12 @@ local FLAG_MAP = {
     interlaced = _ffi.C.FLAG_INTERLACED_HINT,
 }
 
+local window_flags = {}
+for name, flag in pairs(FLAG_MAP) do
+    window_flags[name] = flag
+end
+window_flags.maximized = _ffi.C.FLAG_WINDOW_MAXIMIZED
+
 local INIT_ONLY = {
     transparent = true,
     highdpi = true,
@@ -44,11 +51,10 @@ local DEFAULTS = {
     -- Window
     width = 1280,
     height = 1080,
-    title = "Modit Editor",
+    title = "Modit",
     icon = "",
     root = ".",
     exit_key = 0,
-    audio = false,
 
     -- Flags
     vsync = true,
@@ -71,11 +77,16 @@ local DEFAULTS = {
     -- Rendering
     draw_fps = true,
     target_fps = 144,
-    clear_color = { 22, 22, 22, 255 },
+    clear_colour = { 22, 22, 22, 255 },
 
     -- Scenes
     scene = "",
-    scenes = {}
+    scenes = {},
+
+    modules = {
+        audio = false,
+        input = false
+    }
 }
 
 --- @section Helpers
@@ -93,20 +104,31 @@ local function compute_bits(self)
     return bits
 end
 
---- @section Initialisation
+--- Calls an optional lifecycle hook.
+--- @param self table Window instance
+--- @param name string Hook name (on_ready, on_frame, on_close)
+--- @param ... any Arguments passed to the hook
+local function call_hook(self, name, ...)
+    local hook = self[name]
+    if not hook then return end
+
+    local ok, err = pcall(hook, ...)
+    if not ok then
+        log("error", "Window hook failed and was disabled", { hook = name, error = tostring(err) })
+        self[name] = nil
+    end
+end
+
+--- @section Constructor
 
 local Window = {}
 Window.__index = Window
 
-local window_flags = {}
-for name, flag in pairs(FLAG_MAP) do
-    window_flags[name] = flag
-end
-window_flags.maximized = _ffi.C.FLAG_WINDOW_MAXIMIZED
-
---- @section Lifecycle
-
 --- Creates a new window object.
+--- Optional hooks can be assigned on the returned instance before run():
+---     on_ready() - after the window opens, before the first scene
+---     on_frame(dt) - every frame, before scenes update
+---     on_close() - after the loop ends, before scenes unload
 --- @param config table Window settings, flags and scenes
 --- @return table Window instance
 function Window.new(config)
@@ -115,16 +137,36 @@ function Window.new(config)
 
     for k, v in pairs(DEFAULTS) do
         if config[k] ~= nil then
-            self[k] = config[k]
+            if type(v) == "table" and type(config[k]) == "table" then
+                self[k] = {}
+                for sub_k, sub_v in pairs(v) do
+                    self[k][sub_k] = config[k][sub_k] ~= nil and config[k][sub_k] or sub_v
+                end
+
+                for sub_k, sub_v in pairs(config[k]) do
+                    if self[k][sub_k] == nil then
+                        self[k][sub_k] = sub_v
+                    end
+                end
+            else
+                self[k] = config[k]
+            end
         else
-            self[k] = v
+            if type(v) == "table" then
+                self[k] = {}
+                for sub_k, sub_v in pairs(v) do
+                    self[k][sub_k] = sub_v
+                end
+            else
+                self[k] = v
+            end
         end
     end
 
     self.flag_bits = compute_bits(self)
     self.running = false
 
-    self.scenes = _Scenes.new(self)
+    self.scenes = Scenes.new(self)
     for name, scene in pairs(config.scenes or {}) do
         self.scenes:add(name, scene)
     end
@@ -139,6 +181,8 @@ function Window.new(config)
 
     return self
 end
+
+--- @section Lifecycle
 
 --- Opens the window and runs the loop until it closes.
 function Window:run()
@@ -159,31 +203,52 @@ function Window:run()
     _rl.SetTargetFPS(self.target_fps)
     self:set_icon()
 
-    if self.audio then
+    if self.modules and self.modules.audio then
         _rl.InitAudioDevice()
         log("debug", "Audio device started")
     end
+    
+    local input
+    if self.modules and self.modules.input then
+        input = require("src.sdk.input")
+    end
 
     self.running = true
+    if _G.text_registry then
+        _G.text_registry.root = self.root
+    end
+    if _G.image_registry then
+        _G.image_registry.root = self.root
+    end
+    call_hook(self, "on_ready")
+
     if self.start_scene then
         self.scenes:switch(self.start_scene)
     end
 
     while self.running and not _rl.WindowShouldClose() do
-        self.scenes:update(_rl.GetFrameTime())
+        local dt = _rl.GetFrameTime()
+
+        if input then
+            input.update(dt)
+        end
+
+        call_hook(self, "on_frame", dt)
+        self.scenes:update(dt)
 
         _rl.BeginDrawing()
-        _rl.ClearBackground(self.clear_color)
+        _rl.ClearBackground(self.clear_colour)
 
-        self.scenes:draw()
+        self.scenes:frame()
         if self.draw_fps then _rl.DrawFPS(10, 10) end
 
         _rl.EndDrawing()
     end
 
+    call_hook(self, "on_close")
     self.scenes:unload()
 
-    if self.audio then
+    if self.modules and self.modules.audio then
         _rl.CloseAudioDevice()
     end
     _rl.CloseWindow()
@@ -197,7 +262,7 @@ end
 
 --- @section Runtime Flags
 
---- Reads the live state of a flag straight from raylib.
+--- Reads the live state of a flag straight from raylib before the window opens.
 --- @param name string Flag name (e.g. "vsync", "topmost")
 --- @return boolean|nil State, or nil if the flag name is unknown
 function Window:get_flag(name)
@@ -214,7 +279,7 @@ function Window:get_flag(name)
     return _rl.IsWindowState(flag)
 end
 
---- Sets a flag before the window opens it only updates the config
+--- Sets a flag before the window opens it only updates the config.
 --- @param name string Flag name
 --- @param enabled boolean
 --- @return boolean ok
@@ -334,16 +399,22 @@ function Window:set_size(width, height)
 end
 
 --- Sets the window position on screen.
+--- @param x number
+--- @param y number
 function Window:set_position(x, y)
     _rl.SetWindowPosition(x, y)
 end
 
---- Sets the minimum size (needs the resizable flag).
+--- Sets the minimum size.
+--- @param width number
+--- @param height number
 function Window:set_min_size(width, height)
     _rl.SetWindowMinSize(width, height)
 end
 
---- Sets the maximum size (needs the resizable flag).
+--- Sets the maximum size.
+--- @param width number
+--- @param height number
 function Window:set_max_size(width, height)
     _rl.SetWindowMaxSize(width, height)
 end
@@ -371,7 +442,7 @@ function Window:get_size()
     return _rl.GetScreenWidth(), _rl.GetScreenHeight()
 end
 
---- Current render width and height (accounts for HiDPI).
+--- Current render width and height.
 --- @return number, number
 function Window:get_render_size()
     return _rl.GetRenderWidth(), _rl.GetRenderHeight()
@@ -399,7 +470,7 @@ end
 
 --- @section Monitors
 
---- Info about a monitor (defaults to the one the window is on).
+--- Info about a monitor.
 --- @param index number|nil
 --- @return table
 function Window:get_monitor(index)
@@ -433,6 +504,53 @@ function Window:get_clipboard()
     local str = _rl.GetClipboardText()
     if str == nil then return nil end
     return _ffi.string(str)
+end
+
+--- @section Cursor
+
+--- Shows the cursor.
+function Window:show_cursor()
+    _rl.ShowCursor()
+end
+
+--- Hides the cursor.
+function Window:hide_cursor()
+    _rl.HideCursor()
+end
+
+--- True if the cursor is hidden.
+--- @return boolean
+function Window:is_cursor_hidden()
+    return _rl.IsCursorHidden()
+end
+
+--- Locks the cursor to the window and hides it.
+function Window:lock_cursor()
+    _rl.DisableCursor()
+end
+
+--- Unlocks the cursor.
+function Window:unlock_cursor()
+    _rl.EnableCursor()
+end
+
+--- True if the cursor is inside the window.
+--- @return boolean
+function Window:is_cursor_on_screen()
+    return _rl.IsCursorOnScreen()
+end
+
+--- @section Events
+
+--- When enabled, the loop sleeps in EndDrawing until an event arrives saves CPU when idle.
+--- @param enabled boolean
+function Window:set_event_waiting(enabled)
+    if enabled then
+        _rl.EnableEventWaiting()
+    else
+        _rl.DisableEventWaiting()
+    end
+    self.event_waiting = enabled and true or false
 end
 
 --- @section Icon

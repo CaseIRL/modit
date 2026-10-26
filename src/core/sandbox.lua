@@ -2,6 +2,8 @@
 --- @file src/core/sandbox.lua
 --- @description Sandboxes game and mods.
 --[[
+    Notes:
+    
     All API files should include metadata tags.
 
     At the top:
@@ -18,10 +20,10 @@
     Functions without an access tag use the file's default access level.
 ]]
 
---- @file src/engine/core/sandbox.lua
+--- @file src/core/sandbox.lua
 
-local _fs = require("src.engine.core.filesystem")
-local _utils = require("src.engine.core.utils")
+local _fs = require("src.core.filesystem")
+local _utils = require("src.core.utils")
 
 --- @section Constants
 
@@ -78,9 +80,16 @@ local function lowest_role(spec, where)
         if not rank then
             error(("sandbox: %s: unknown access role '%s'"):format(where, token), 0)
         end
-        if not best or rank < ROLE_RANK[best] then best = token end
+
+        if not best or rank < ROLE_RANK[best] then
+            best = token
+        end
     end
-    if not best then error(("sandbox: %s: empty @access tag"):format(where), 0) end
+
+    if not best then
+        error(("sandbox: %s: empty @access tag"):format(where), 0)
+    end
+
     return best
 end
 
@@ -115,7 +124,9 @@ local function parse_metadata(code, source)
         if default_spec then
             default_role = lowest_role(default_spec, where)
         elseif access_spec then
-            if pending then warn(pending_line, "@access tag replaced before reaching a definition") end
+            if pending then
+                warn(pending_line, "@access tag replaced before reaching a definition")
+            end
             pending, pending_line = lowest_role(access_spec, where), i
         else
             local obj, key = line:match("^function%s+([%a_][%w_]*)[%.:]([%a_][%w_]*)")
@@ -131,7 +142,9 @@ local function parse_metadata(code, source)
                 members[key] = { role = role or "engine", tagged = role ~= nil, line = i }
                 pending = nil
             elseif not line:match("^%s*%-%-") and not line:match("^%s*$") then
-                if pending then warn(pending_line, "@access tag not followed by a module member") end
+                if pending then
+                    warn(pending_line, "@access tag not followed by a module member")
+                end
                 pending = nil
             end
         end
@@ -145,31 +158,6 @@ end
 --- @return string Module name
 local function module_name_of(path)
     return (path:gsub("%.lua$", ""):gsub("[/\\]", "."))
-end
-
---- Reads the source code for a module from path.
---- @param path string File path
---- @return string Source code
-local function read_source(path)
-    local code = m.read_file(path)
-    if code then return code end
-
-    local rel = module_name_of(path):gsub("%.", "/")
-    for template in package.path:gmatch("[^;]+") do
-        local candidate = template:gsub("%?", function() return rel end)
-        code = m.read_file(candidate)
-        if code then
-            return code
-        end
-    end
-    error("sandbox: failed to open module source -> " .. tostring(path), 0)
-end
-
---- Clears the manifest table sections.
-local function clear_manifest()
-    for _, section in pairs(MANIFEST) do
-        for key in pairs(section) do section[key] = nil end
-    end
 end
 
 --- Reads a file from disk or bundle.
@@ -193,6 +181,33 @@ local function read_file(path)
     return _fs.read_file(path)
 end
 
+--- Reads the source code for a module from path.
+--- @param path string File path
+--- @return string Source code
+local function read_source(path)
+    local code = read_file(path)
+    if code then return code end
+
+    local rel = module_name_of(path):gsub("%.", "/")
+    for template in package.path:gmatch("[^;]+") do
+        local candidate = template:gsub("%?", function() return rel end)
+        code = read_file(candidate)
+        if code then
+            return code
+        end
+    end
+    error("sandbox: failed to open module source -> " .. tostring(path), 0)
+end
+
+--- Clears the manifest table sections.
+local function clear_manifest()
+    for _, section in pairs(MANIFEST) do
+        for key in pairs(section) do
+            section[key] = nil
+        end
+    end
+end
+
 --- Recursively collects all Lua files in a directory.
 --- @param dir string Directory path
 --- @param out table Output array
@@ -200,7 +215,9 @@ end
 local function collect_lua_files(dir, out)
     local entries = {}
     for _, entry in ipairs(_fs.list_directory(dir) or {}) do
-        if type(entry) == "string" then entries[#entries + 1] = entry end
+        if type(entry) == "string" then
+            entries[#entries + 1] = entry
+        end
     end
     table.sort(entries)
 
@@ -215,20 +232,21 @@ local function collect_lua_files(dir, out)
 end
 
 --- Scans the API directory to build the manifest.
---- @param api_dir string|nil Optional API directory path
-local function scan_api(api_dir)
-    api_dir = api_dir or "src/api"
+--- @param sdk_dir string|nil Optional API directory path
+local function scan_sdk(sdk_dir)
+    sdk_dir = sdk_dir or "src/sdk"
     scanned = true
-    if not _fs.directory_exists(api_dir) then
+
+    if not _fs.directory_exists(sdk_dir) then
         return
     end
 
     clear_manifest()
 
-    for _, filepath in ipairs(collect_lua_files(api_dir, {})) do
-        local code = m.read_file(filepath)
+    for _, filepath in ipairs(collect_lua_files(sdk_dir, {})) do
+        local code = read_file(filepath)
         if code then
-            local module_name = code:match("%-%-%s*@module%s+api%.([%w_]+)")
+            local module_name = code:match("%-%-%s*@module%s+sdk%.([%w_]+)")
             local realm = code:match("%-%-%s*@default_realm%s+(%w+)")
 
             if module_name and realm then
@@ -287,12 +305,13 @@ local function load_realm(realm)
     if realm_cache[realm] then
         return realm_cache[realm]
     end
+
     if realm ~= "client" and realm ~= "server" then
         error(("sandbox: unknown realm '%s'"):format(tostring(realm)), 3)
     end
 
     if not scanned then
-        scan_api()
+        scan_sdk()
     end
 
     local modules = {}
@@ -302,9 +321,11 @@ local function load_realm(realm)
             modules[name] = load_module(name, paths)
         end
     end
+
     if MANIFEST.shared then
         batch(MANIFEST.shared)
     end
+
     if MANIFEST[realm] then
         batch(MANIFEST[realm])
     end
@@ -332,6 +353,7 @@ local function build_view(mod, caller_rank)
             view[key] = value
         end
     end
+
     return view
 end
 
@@ -341,7 +363,10 @@ end
 --- @return table New table with picked keys
 local function pick(src, keys)
     local out = {}
-    for _, k in ipairs(keys) do out[k] = src[k] end
+    for _, k in ipairs(keys) do
+        out[k] = src[k]
+    end
+
     return out
 end
 
@@ -352,12 +377,32 @@ local function valid_module_name(name)
     if type(name) ~= "string" or name == "" then
         return false
     end
+
     for segment in (name .. "."):gmatch("([^%.]*)%.") do
         if not segment:match("^[%a_][%w_]*$") then
             return false
         end
     end
+
     return true
+end
+
+--- Compiles Lua source text into a chunk that runs in env. Rejects bytecode.
+--- @param code string Source text
+--- @param path string Used for error messages
+--- @param env table Environment the chunk runs in
+--- @return function|nil Chunk, or nil plus an error message
+local function compile(code, path, env)
+    if code:sub(1, 1) == "\27" then
+        return nil, "bytecode is not allowed, only source"
+    end
+    
+    local chunk, err = loadstring(code, "@" .. path)
+    if not chunk then
+        return nil, err
+    end
+
+    return setfenv(chunk, env)
 end
 
 --- Creates a sandboxed require function.
@@ -394,22 +439,70 @@ local function make_require(root, env)
             error(("require: module '%s' not found in project"):format(name), 2)
         end
 
-        if code:sub(1, 1) == "\27" then
-            error(("require: '%s' is bytecode, only source is allowed"):format(name), 2)
-        end
-
-        local chunk, err = loadstring(code, "@" .. path)
+        local chunk, err = compile(code, path, env)
         if not chunk then
             error(("require: failed to load '%s': %s"):format(name, err), 2)
         end
 
-        setfenv(chunk, env)
         loaded[name] = LOADING
         local result = chunk(name)
-        if result == nil then result = true end
+        if result == nil then
+            result = true
+        end
         loaded[name] = result
+
         return result
     end
+end
+
+--- Loads a project's config.lua in an empty environment (it is data only).
+--- @param project_path string Project folder
+--- @return table|nil Config, or nil plus an error message
+local function load_config(project_path)
+    local path = project_path .. "/config.lua"
+
+    local code = _fs.read_file(path)
+    if not code then
+        return nil, "config.lua not found in '" .. project_path .. "'"
+    end
+
+    local chunk, err = compile(code, path, {})
+    if not chunk then
+        return nil, err
+    end
+
+    local ok, config = pcall(chunk)
+    if not ok then
+        return nil, tostring(config)
+    end
+    if type(config) ~= "table" then
+        return nil, "config.lua must return a table"
+    end
+
+    return config
+end
+
+--- Loads each scene path in config.scenes through the sandboxed require.
+--- @param config table Project config (config.scenes is replaced with loaded scenes)
+--- @return boolean ok
+--- @return string|nil error
+local function load_scenes(config)
+    local env, err = m.create_env("client", "game", config, { root = config.root })
+    if not env then
+        return false, err
+    end
+
+    for name, path in pairs(config.scenes or {}) do
+        if type(path) == "string" then
+            local ok, scene = pcall(env.require, path)
+            if not ok then
+                return false, ("scene '%s' (%s): %s"):format(name, path, tostring(scene))
+            end
+            config.scenes[name] = scene
+        end
+    end
+
+    return true
 end
 
 --- @section Reset
@@ -433,7 +526,9 @@ function m.release_owner(realm, owner)
             local fn = mod.exports[fname]
             if type(fn) == "function" then
                 local ok, err = pcall(fn, owner)
-                if not ok then log("warn", ("%s.%s('%s') failed: %s"):format(name, fname, owner, tostring(err))) end
+                if not ok then
+                    log("warn", ("%s.%s('%s') failed: %s"):format(name, fname, owner, tostring(err)))
+                end
             end
         end
     end
@@ -459,6 +554,7 @@ function m.load_env(realm, role, opts)
             end
         end
     end
+
     return env
 end
 
@@ -480,6 +576,10 @@ function m.make_env(role, modules, opts)
     end
 
     env.print = opts.print or print
+    env.log = _G.log
+    env.log_history = _G.log_history
+    env.json = _G.json
+    
     env.getmetatable = function(value)
         if type(value) == "string" then
             return nil
@@ -549,10 +649,14 @@ function m.create_env(realm, role, conf, opts)
         for name, mod in pairs(load_realm(realm)) do
             local scoped = mod.exports.scoped
             if type(scoped) == "function" and is_enabled(name, enabled_modules) then
-                local api = scoped(opts.scope.owner, opts.scope.root)
-                if type(api) == "table" then
-                    if type(modules[name]) ~= "table" then modules[name] = {} end
-                    for k, v in pairs(api) do modules[name][k] = v end
+                local sdk = scoped(opts.scope.owner, opts.scope.root)
+                if type(sdk) == "table" then
+                    if type(modules[name]) ~= "table" then
+                        modules[name] = {}
+                    end
+                    for k, v in pairs(sdk) do
+                        modules[name][k] = v
+                    end
                 end
             end
         end
@@ -561,13 +665,36 @@ function m.create_env(realm, role, conf, opts)
     for key, value in pairs(opts.extra or {}) do
         local existing = modules[key]
         if type(existing) == "table" and type(value) == "table" then
-            for k, v in pairs(value) do existing[k] = v end
+            for k, v in pairs(value) do
+                existing[k] = v
+            end
         else
             modules[key] = value
         end
     end
 
     return m.make_env(role, modules, opts), modules
+end
+
+--- @section Projects
+
+--- Loads a project: reads its config and loads its scenes inside the sandbox.
+--- @param project_path string Project folder
+--- @return table|nil Config ready for Window.new, or nil plus an error message
+function m.load_project(project_path)
+    local config, err = load_config(project_path)
+    if not config then
+        return nil, err
+    end
+
+    config.root = project_path
+
+    local ok, scene_err = load_scenes(config)
+    if not ok then
+        return nil, scene_err
+    end
+
+    return config
 end
 
 return m

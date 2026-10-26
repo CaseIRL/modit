@@ -7,9 +7,9 @@ return {
     --- @section Window
 
     width = 1280, -- Window width
-    height = 1080, -- Window height
+    height = 720, -- Window height
     title = "Modit Demo", -- Window title
-    icon = "assets/modit_icon_32x32.png", -- Window icon path
+    icon = "assets/images/modit_icon_32x32.png", -- Window icon path
     root = ".", -- Project root directory
 
     vsync = true, -- VSync enabled
@@ -20,18 +20,18 @@ return {
     transparent = false, -- Transparent background
     hidden = false, -- Start hidden
     minimized = false, -- Start minimized
-    maximized = true, -- Start maximized
+    maximized = false, -- Start maximized
     unfocused = false, -- Start without focus
     topmost = false, -- Always on top
     always_run = false, -- Run when unfocused
-    highdpi = true, -- High-DPI support
+    highdpi = false, -- High-DPI support
     mouse_passthrough = false, -- Mouse clicks pass through
     msaa_4x = false, -- 4x MSAA anti-aliasing
     interlaced = false, -- Interlaced mode
 
     draw_fps = false, -- Draw FPS counter
     target_fps = 500, -- Target frame rate limit
-    clear_color = { 22, 22, 22, 255 }, -- Background clear color (RGBA)
+    clear_colour = { 0, 0, 0, 255 }, -- Background clear color (RGBA)
 
     --- @section Scenes
 
@@ -42,5 +42,9 @@ return {
 
     --- @section Modules
 
-    audio = false -- Enables both Raylibs InitAudioDevice and modit audio module
+    modules = {
+        audio = false, -- Enables both Raylibs InitAudioDevice and modit audio module 
+        input = true, -- Enables mouse, keyboard, gamepad and action bindings
+        graphics = true -- Enables 2D/3D graphics; shapes, models, lighting, shadows
+    }
 }

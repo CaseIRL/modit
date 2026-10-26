@@ -1,11 +1,11 @@
 --- @module core.utils
---- @file src/core/m.lua
+--- @file src/core/utils.lua
 --- @description Shared utility helpers used throughout framework
 
 --- @section Imports
 
 local _ffi = require("ffi")
-local _filesystem = require("src.engine.core.filesystem")
+local _filesystem = require("src.core.filesystem")
 
 --- @section Initialisation
 

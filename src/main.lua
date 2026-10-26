@@ -1,33 +1,22 @@
 --- @file src/main.lua
---- @description Main modit entry file.
+--- @description Main modit entry file. Parses the mode and boots the engine.
 
 --- @section Initialisation
 
 package.path = "./?.lua;./?/init.lua;" .. package.path
 
-require("src.engine.core.globals")
+require("src.core.globals")
 
 local MODES = {
-    ["--editor"] = true,
-    ["--game"] = true,
+    ["--project"] = true,
     ["--headless"] = true
 }
 
-local mode = arg[1] or "--editor"
-local project_path = arg[2] or "."
+local mode = arg[1]
+local project_path = arg[2]
 
 if not MODES[mode] then
-    log("error", "Unrecognised mode. Allowed: [editor | game | headless]")
-    return
-end
-
---- @section Editor
-
-if mode == "--editor" then
-    local engine = require("src.engine")
-    local config = require("src.editor.config")
-    config.root = config.root or "."
-    engine.run("editor", config)
+    log("error", "Unrecognised mode. Usage: --project <path> | --headless")
     return
 end
 
@@ -38,28 +27,24 @@ if mode == "--headless" then
     return
 end
 
---- @section Game
+--- @section Project
 
-if mode == "--game" then
-    local engine = require("src.engine")
-
-    local config_file = project_path .. "/config.lua"
-    
-    local chunk, err = loadfile(config_file)
-    if not chunk then
-        log("error", "Failed to load game config from '" .. config_file .. "': " .. tostring(err))
+if mode == "--project" then
+    if not project_path then
+        log("error", "--project requires a project path")
         return
     end
 
-    local ok, config = pcall(chunk)
-    if not ok or type(config) ~= "table" then
-        log("error", "Game config at '" .. config_file .. "' must return a valid table. Error: " .. tostring(config))
+    local sandbox = require("src.core.sandbox")
+    local Window = require("src.renderer.window")
+
+    log("info", "Launching project from: " .. project_path)
+
+    local config, err = sandbox.load_project(project_path)
+    if not config then
+        log("fatal", "Failed to load project", { path = project_path, error = tostring(err) })
         return
     end
 
-    config.root = project_path
-
-    log("info", "Launching game project from: " .. project_path)
-    engine.run("game", config)
-    return
+    Window.new(config):run()
 end

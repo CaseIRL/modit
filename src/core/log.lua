@@ -1,5 +1,5 @@
 --- @module log
---- @file src/engine/core/log.lua
+--- @file src/core/log.lua
 --- @description Color-coded logging subsystem with ANSI formatting.
 
 --- @section Constants & State
