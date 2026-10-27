@@ -29,7 +29,7 @@ return {
     msaa_4x = false, -- 4x MSAA anti-aliasing
     interlaced = false, -- Interlaced mode
 
-    draw_fps = false, -- Draw FPS counter
+    draw_fps = true, -- Draw FPS counter
     target_fps = 500, -- Target frame rate limit
     clear_colour = { 0, 0, 0, 255 }, -- Background clear color (RGBA)
 
@@ -40,11 +40,22 @@ return {
         main = "scenes.demo" -- Registered scene paths
     },
 
+    --- @section Mod support
+
+    modding = {
+        enabled = true, -- Enabled modding support for project; make sure to enable & use `modit.event` so mods can communicate with game
+        blacklisted_modules = {
+            -- List any SDK modules you want to restrict from mods here, e.g.:
+            -- "audio"
+        }
+    },
+
     --- @section Modules
 
     modules = {
-        audio = false, -- Enables both Raylibs InitAudioDevice and modit audio module 
+        audio = true, -- Enables both Raylibs InitAudioDevice and modit audio module 
         input = true, -- Enables mouse, keyboard, gamepad and action bindings
-        graphics = true -- Enables 2D/3D graphics; shapes, models, lighting, shadows
-    }
+        graphics = true, -- Enables 2D/3D graphics; shapes, models, lighting, shadows
+        event = true, -- Enabled event system so games can register events to communicate with itself or mods
+    },
 }

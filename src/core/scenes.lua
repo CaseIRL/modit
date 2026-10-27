@@ -85,8 +85,8 @@ function Scenes:switch(target, data)
         log("warn", "TextRegistry global not found during scene switch", { scene = self.current_name })
     end
 
-    if _G.draw_list then
-        _G.draw_list:set_active_scene(self.current_name)
+    if _G.render_list then
+        _G.render_list:set_active_scene(self.current_name)
     end
     if _G.image_registry then
         _G.image_registry:set_active_scene(self.current_name)
@@ -128,8 +128,8 @@ function Scenes:unload()
         _G.image_registry:clear_scene(self.current_name)
     end
 
-    if self.current_name and _G.draw_list then
-        _G.draw_list:clear(self.current_name)
+    if self.current_name and _G.render_list then
+        _G.render_list:clear(self.current_name)
     end
 
     self.current = nil
@@ -161,8 +161,8 @@ function Scenes:frame()
         if scene.frame then
             scene:frame()
         end
-        if self.current_name and _G.draw_list then
-            _G.draw_list:draw(self.current_name)
+        if self.current_name and _G.render_list then
+            _G.render_list:draw(self.current_name)
         end
     end
 end

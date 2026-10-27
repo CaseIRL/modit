@@ -27,6 +27,7 @@ That should give a large amount of features already.
 - [x] Layered draw list
 - [x] Graphics API: Covers what currently works, nothing more
 - [x] Input controls: keyboard, mouse, gamepade & action bindings
+- [x] Audio basic but works
 - [] Physics: basic at first only need rigid bodies to explode
 - [] Fps Controller 
 - [] Networking

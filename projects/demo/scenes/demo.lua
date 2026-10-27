@@ -3,7 +3,6 @@
 
 --- @section Constants
 
-
 local IMG = "assets/images/"
 local TITLE_IMAGE = IMG .. "fps_title.png"
 local ICON_IMAGE = IMG .. "modit_icon_32x32.png"
@@ -47,6 +46,16 @@ end
 
 function scene:load()
     self.font = modit.graphics.load_font("assets/fonts/JetBrainsMono-Regular.ttf", 16)
+
+    self.bg_music = modit.audio.load_music("assets/audio/horde_drums.ogg")
+    self.shot_sound = modit.audio.load_sound("assets/audio/headshot.ogg")
+
+    if self.bg_music then
+        self.bg_music:play(true)
+    end
+
+    self.muted = false
+    self.music_paused = false
 
     self.state = "title"
     self.time = 0
@@ -196,7 +205,7 @@ function scene:build_character()
     self.facing = "front"
     self.action = false
 
-    self:label("WASD/arrows walk | J jump | C chop | P pickup | X death | Q/E zoom | ESC title", 20, SCREEN_H - 100)
+    self:label("WASD walk | J jump | C chop | P pickup | X death | M mute | N music | Q/E zoom | ESC title", 20, SCREEN_H - 100)
     self.status = self:label("Animation: idle_front", 20, SCREEN_H - 70)
     self.mouse_text = self:label("mouse world: 0, 0", 20, SCREEN_H - 40)
 end
@@ -240,6 +249,31 @@ function scene:update_play(dt)
         return
     end
 
+    local input = modit.input
+
+    -- Audio Mute Toggle (M)
+    if input.key_pressed("m") then
+        self.muted = not self.muted
+        local vol = self.muted and 0.0 or 1.0
+        if self.bg_music then self.bg_music:set_volume(vol) end
+        if self.shot_sound then self.shot_sound:set_volume(vol) end
+        self.status:set_text(self.muted and "Audio: Muted" or "Audio: Unmuted")
+    end
+
+    -- Music Pause/Resume Toggle (N)
+    if input.key_pressed("n") then
+        self.music_paused = not self.music_paused
+        if self.bg_music then
+            if self.music_paused then
+                self.bg_music:stop()
+                self.status:set_text("Music: Paused")
+            else
+                self.bg_music:play(true)
+                self.status:set_text("Music: Playing")
+            end
+        end
+    end
+
     if self.action then
         if self.character.playing then
             self:update_camera()
@@ -248,7 +282,6 @@ function scene:update_play(dt)
         self.action = false
     end
 
-    local input = modit.input
     local anim
 
     if input.key_pressed("j") then return self:play_action("jump") end
@@ -303,10 +336,14 @@ function scene:play_action(name)
     self.character:play(anim, true)
     self.status:set_text("Animation: " .. anim)
     self.action = true
+
+    if self.shot_sound then
+        self.shot_sound:play()
+    end
 end
 
 --- @section Frame
---- Anything added here draws first, DrawList handles the order for everything else. 
+--- Anything added here draws first, RenderList handles the order for everything else. 
 
 function scene:frame()
 end
@@ -316,6 +353,12 @@ end
 function scene:unload()
     if self.font then
         self.font:unload()
+    end
+    if self.bg_music then
+        self.bg_music:unload()
+    end
+    if self.shot_sound then
+        self.shot_sound:unload()
     end
 end
 

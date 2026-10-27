@@ -220,6 +220,9 @@ function Window:run()
     if _G.image_registry then
         _G.image_registry.root = self.root
     end
+    if _G.audio_registry then
+        _G.audio_registry.root = self.root
+    end
     call_hook(self, "on_ready")
 
     if self.start_scene then
@@ -231,6 +234,10 @@ function Window:run()
 
         if input then
             input.update(dt)
+        end
+
+        if _G.audio_registry then
+            _G.audio_registry:update(dt)
         end
 
         call_hook(self, "on_frame", dt)

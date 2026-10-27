@@ -22,11 +22,11 @@ end
 --- Sets the active scene's camera, or clears it with nil. Cleared automatically when the scene unloads.
 --- @param camera table|nil Camera from new_camera
 function m.set_camera(camera)
-    if not _G.draw_list then
-        log("warn", "DrawList not initialized")
+    if not _G.render_list then
+        log("warn", "RenderList not initialized")
         return
     end
-    _G.draw_list:set_camera(camera)
+    _G.render_list:set_camera(camera)
 end
 
 --- Current window width and height in pixels.

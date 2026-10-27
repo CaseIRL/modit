@@ -1,5 +1,5 @@
---- @class DrawList
---- @file src/graphics/draw_list.lua
+--- @class RenderList
+--- @file src/graphics/render_list.lua
 --- @description Draw list per scene.
 --[[
     Notes:    
@@ -25,13 +25,13 @@ end
 
 --- @section Constructor
 
-local DrawList = {}
-DrawList.__index = DrawList
+local RenderList = {}
+RenderList.__index = RenderList
 
 --- Creates a new draw list instance.
---- @return table DrawList instance
-function DrawList.new()
-    local self = setmetatable({}, DrawList)
+--- @return table RenderList instance
+function RenderList.new()
+    local self = setmetatable({}, RenderList)
     self.scenes = {}
     self.seq = 0
     self.active_scene = "default"
@@ -49,14 +49,14 @@ end
 
 --- Sets the scene that set_camera applies to.
 --- @param scene_name string
-function DrawList:set_active_scene(scene_name)
+function RenderList:set_active_scene(scene_name)
     self.active_scene = scene_name or "default"
 end
 
 --- Sets (or clears, with nil) the camera used for world objects in a scene.
 --- @param camera table|nil Camera from renderer.camera
 --- @param scene_name string|nil defaults to the active scene
-function DrawList:set_camera(camera, scene_name)
+function RenderList:set_camera(camera, scene_name)
     get_list(self, scene_name or self.active_scene).camera = camera
 end
 
@@ -65,7 +65,7 @@ end
 --- Registers an object. It needs obj.layer, obj.active and obj:render().
 --- @param scene_name string
 --- @param obj table
-function DrawList:add(scene_name, obj)
+function RenderList:add(scene_name, obj)
     local list = get_list(self, scene_name)
     self.seq = self.seq + 1
     obj.order = self.seq
@@ -78,7 +78,7 @@ end
 --- Flags an object as removed, it is dropped on the next draw.
 --- @param scene_name string
 --- @param obj table
-function DrawList:remove(scene_name, obj)
+function RenderList:remove(scene_name, obj)
     obj.removed = true
     local list = self.scenes[scene_name]
     if list then
@@ -88,7 +88,7 @@ end
 
 --- Call after changing an objects layer.
 --- @param scene_name string
-function DrawList:touch(scene_name)
+function RenderList:touch(scene_name)
     local list = self.scenes[scene_name]
     if list then
         list.dirty = true
@@ -97,13 +97,13 @@ end
 
 --- Drops every object in a scene.
 --- @param scene_name string
-function DrawList:clear(scene_name)
+function RenderList:clear(scene_name)
     self.scenes[scene_name] = nil
 end
 
 --- Draws a scenes objects back to front.
 --- @param scene_name string
-function DrawList:draw(scene_name)
+function RenderList:draw(scene_name)
     local list = self.scenes[scene_name]
     if not list then return end
 
@@ -148,4 +148,4 @@ function DrawList:draw(scene_name)
     end
 end
 
-return DrawList
+return RenderList

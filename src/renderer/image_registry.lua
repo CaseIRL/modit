@@ -293,12 +293,12 @@ function ImageRegistry:add(config)
 
     function img:set_space(space)
         self.space = space
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     function img:set_layer(layer)
         self.layer = layer
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     function img:get_size()
@@ -368,7 +368,7 @@ function ImageRegistry:add(config)
     end
 
     pool[id] = img
-    _G.draw_list:add(self.active_scene, img)
+    _G.render_list:add(self.active_scene, img)
     return img
 end
 
@@ -380,7 +380,7 @@ function ImageRegistry:remove_image(scene_name, id)
     local obj = pool and pool[id]
     if obj then
         pool[id] = nil
-        _G.draw_list:remove(scene_name, obj)
+        _G.render_list:remove(scene_name, obj)
     end
 end
 

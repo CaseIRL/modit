@@ -186,12 +186,12 @@ function TextRegistry:add(config)
 
     function text_obj:set_space(space)
         self.space = space
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     function text_obj:set_layer(layer)
         self.layer = layer
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     function text_obj:measure()
@@ -203,7 +203,7 @@ function TextRegistry:add(config)
     end
 
     scene_pool[id] = text_obj
-    _G.draw_list:add(self.active_scene, text_obj)
+    _G.render_list:add(self.active_scene, text_obj)
     return text_obj
 end
 
@@ -215,7 +215,7 @@ function TextRegistry:remove_text(scene_name, id)
     local obj = pool and pool[id]
     if obj then
         pool[id] = nil
-        _G.draw_list:remove(scene_name, obj)
+        _G.render_list:remove(scene_name, obj)
     end
 end
 

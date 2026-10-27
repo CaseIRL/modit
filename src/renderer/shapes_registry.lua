@@ -226,16 +226,16 @@ function ShapesRegistry:add(shape_type, config)
 
     function shape:set_space(space)
         self.space = space
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     function shape:set_layer(layer)
         self.layer = layer
-        _G.draw_list:touch(self.scene)
+        _G.render_list:touch(self.scene)
     end
 
     scene_pool[id] = shape
-    _G.draw_list:add(self.active_scene, shape)
+    _G.render_list:add(self.active_scene, shape)
     log("debug", "Shape added to registry", { id = id, type = shape_type, scene = self.active_scene })
     return shape
 end
@@ -248,7 +248,7 @@ function ShapesRegistry:remove_shape(scene_name, id)
     local obj = pool and pool[id]
     if obj then
         pool[id] = nil
-        _G.draw_list:remove(scene_name, obj)
+        _G.render_list:remove(scene_name, obj)
         log("debug", "Shape removed from registry", { id = id, scene = scene_name })
     end
 end
