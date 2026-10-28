@@ -14,17 +14,12 @@ _G.json = require("src.core.json")
 
 --- @section Registries
 
-local RenderList = require("src.renderer.render_list")
-_G.render_list = RenderList.new()
+_G.render_list = require("src.renderer.render_list").new()
+_G.shapes_registry = require("src.renderer.shapes_registry").new()
+_G.text_registry = require("src.renderer.text_registry").new()
+_G.image_registry = require("src.renderer.image_registry").new()
+_G.model_registry = require("src.renderer.model_registry").new()
+_G.shader_registry = require("src.renderer.shader_registry").new()
+_G.environment = require("src.renderer.environment").new()
 
-local ShapesRegistry = require("src.renderer.shapes_registry")
-_G.shapes_registry = ShapesRegistry.new()
-
-local TextRegistry = require("src.renderer.text_registry")
-_G.text_registry = TextRegistry.new()
-
-local ImageRegistry = require("src.renderer.image_registry")
-_G.image_registry = ImageRegistry.new()
-
-local AudioRegistry = require("src.audio.audio_registry")
-_G.audio_registry = AudioRegistry.new()
+_G.audio_registry = require("src.audio.audio_registry").new()

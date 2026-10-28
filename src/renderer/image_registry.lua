@@ -70,7 +70,7 @@ local function apply_frame(img)
     end
 end
 
---- Draws one Image object. Registered with the draw list as obj:render().
+--- Draws one Image object. Registered with the render list as obj:render().
 --- @param img table Image object
 local function render_image(img)
     local tex = img.texture and img.texture.handle

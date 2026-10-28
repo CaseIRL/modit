@@ -1,12 +1,14 @@
 --- @class RenderList
---- @file src/graphics/render_list.lua
+--- @file src/renderer/render_list.lua
 --- @description Draw list per scene.
 --[[
-    Notes:    
+    Notes:
 
-    Shapes, text and images all register here.
+    Shapes, text, images and models all register here.
     World objects (space = "world") draw first inside the scene's camera, then screen objects.
     Each pass is sorted by (layer, creation order), re-sorted only when something changes.
+    With a 3D camera the environment wraps the world pass: shadow map and sky before it,
+    lighting and shadows inside it.
 ]]
 
 --- @section Helpers
@@ -23,12 +25,21 @@ local function by_layer(a, b)
     return a.order < b.order
 end
 
+local function get_list(self, scene_name)
+    local list = self.scenes[scene_name]
+    if not list then
+        list = { items = {}, dirty = false, world_count = 0 }
+        self.scenes[scene_name] = list
+    end
+    return list
+end
+
 --- @section Constructor
 
 local RenderList = {}
 RenderList.__index = RenderList
 
---- Creates a new draw list instance.
+--- Creates a new render list instance.
 --- @return table RenderList instance
 function RenderList.new()
     local self = setmetatable({}, RenderList)
@@ -38,14 +49,7 @@ function RenderList.new()
     return self
 end
 
-local function get_list(self, scene_name)
-    local list = self.scenes[scene_name]
-    if not list then
-        list = { items = {}, dirty = false }
-        self.scenes[scene_name] = list
-    end
-    return list
-end
+--- @section Methods
 
 --- Sets the scene that set_camera applies to.
 --- @param scene_name string
@@ -53,16 +57,14 @@ function RenderList:set_active_scene(scene_name)
     self.active_scene = scene_name or "default"
 end
 
---- Sets (or clears, with nil) the camera used for world objects in a scene.
+--- Sets the camera used for world objects in a scene.
 --- @param camera table|nil Camera from renderer.camera
 --- @param scene_name string|nil defaults to the active scene
 function RenderList:set_camera(camera, scene_name)
     get_list(self, scene_name or self.active_scene).camera = camera
 end
 
---- @section Methods
-
---- Registers an object. It needs obj.layer, obj.active and obj:render().
+--- Registers an object it needs obj.layer, obj.active and obj:render().
 --- @param scene_name string
 --- @param obj table
 function RenderList:add(scene_name, obj)
@@ -124,27 +126,45 @@ function RenderList:draw(scene_name)
         end
 
         table.sort(items, by_layer)
+
+        local world = 0
+        for i = 1, kept do
+            if items[i].space ~= "world" then break end
+            world = i
+        end
+        list.world_count = world
         list.dirty = false
     end
 
-    -- World objects sort first, so the camera mode begins and ends once.
+    local count = #items
     local camera = list.camera
-    local in_world = false
-    for i = 1, #items do
+    local first_screen = 1
+
+    if camera then
+        local world_count = list.world_count
+        local env = camera.mode == "3d" and _G.environment or nil
+
+        if env then env:begin_scene(camera, items, world_count) end
+        camera:begin_mode()
+        if env then env:begin_lighting() end
+
+        for i = 1, world_count do
+            local obj = items[i]
+            if obj.active then
+                obj:render()
+            end
+        end
+
+        if env then env:end_lighting(items, world_count) end
+        camera:end_mode()
+        first_screen = world_count + 1
+    end
+
+    for i = first_screen, count do
         local obj = items[i]
         if obj.active then
-            if camera then
-                local is_world = obj.space == "world"
-                if is_world ~= in_world then
-                    if is_world then camera:begin_mode() else camera:end_mode() end
-                    in_world = is_world
-                end
-            end
             obj:render()
         end
-    end
-    if in_world then
-        camera:end_mode()
     end
 end
 

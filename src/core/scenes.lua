@@ -72,6 +72,11 @@ function Scenes:switch(target, data)
     self.current = scene
     self.current_name = target_name
 
+    if _G.render_list then
+        _G.render_list:set_active_scene(self.current_name)
+    else
+        log("warn", "RenderList global not found during scene switch", { scene = self.current_name })
+    end
 
     if _G.shapes_registry then
         _G.shapes_registry:set_active_scene(self.current_name)
@@ -85,13 +90,16 @@ function Scenes:switch(target, data)
         log("warn", "TextRegistry global not found during scene switch", { scene = self.current_name })
     end
 
-    if _G.render_list then
-        _G.render_list:set_active_scene(self.current_name)
-    end
     if _G.image_registry then
         _G.image_registry:set_active_scene(self.current_name)
     else
         log("warn", "ImageRegistry global not found during scene switch", { scene = self.current_name })
+    end
+
+    if _G.model_registry then
+        _G.model_registry:set_active_scene(self.current_name)
+    else
+        log("warn", "ModelRegistry global not found during scene switch", { scene = self.current_name })
     end
 
     log("debug", "Scene context loaded", { name = self.current_name })
@@ -128,8 +136,16 @@ function Scenes:unload()
         _G.image_registry:clear_scene(self.current_name)
     end
 
+    if self.current_name and _G.model_registry then
+        _G.model_registry:clear_scene(self.current_name)
+    end
+
     if self.current_name and _G.render_list then
         _G.render_list:clear(self.current_name)
+    end
+
+    if _G.environment then
+        _G.environment:reset()
     end
 
     self.current = nil
@@ -145,9 +161,15 @@ function Scenes:update(dt)
         if self.current_name and _G.shapes_registry then
             _G.shapes_registry:update(dt, self.current_name)
         end
+
         if self.current_name and _G.image_registry then
             _G.image_registry:update(dt, self.current_name)
         end
+
+        if self.current_name and _G.model_registry then
+            _G.model_registry:update(dt, self.current_name)
+        end
+
         if scene.update then
             scene:update(dt)
         end
@@ -161,6 +183,7 @@ function Scenes:frame()
         if scene.frame then
             scene:frame()
         end
+        
         if self.current_name and _G.render_list then
             _G.render_list:draw(self.current_name)
         end

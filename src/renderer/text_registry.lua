@@ -34,7 +34,7 @@ end
 
 --- @section Rendering
 
---- Draws one text object. Registered with the draw list as obj:render().
+--- Draws one text object. Registered with the render list as obj:render().
 --- @param t table Text object
 local function render_text(t)
     local str = tostring(t.text or "")

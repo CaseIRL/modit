@@ -14,8 +14,6 @@ local Scenes = require("src.core.scenes")
 
 --- @section Constants
 
--- Flags applied before InitWindow via SetConfigFlags.
--- maximized is not in here. It has to be set after InitWindow (see run)
 local FLAG_MAP = {
     vsync = _ffi.C.FLAG_VSYNC_HINT,
     fullscreen = _ffi.C.FLAG_FULLSCREEN_MODE,
@@ -50,32 +48,32 @@ local INIT_ONLY = {
 local DEFAULTS = {
     -- Window
     width = 1280,
-    height = 1080,
+    height = 270,
     title = "Modit",
     icon = "",
     root = ".",
     exit_key = 0,
 
     -- Flags
-    vsync = true,
+    vsync = false,
     fullscreen = false,
     borderless = false,
-    resizable = true,
+    resizable = false,
     undecorated = false,
     transparent = false,
     hidden = false,
     minimized = false,
-    maximized = true,
+    maximized = false,
     unfocused = false,
     topmost = false,
     always_run = false,
-    highdpi = true,
+    highdpi = false,
     mouse_passthrough = false,
     msaa_4x = false,
     interlaced = false,
 
     -- Rendering
-    draw_fps = true,
+    draw_fps = false,
     target_fps = 144,
     clear_colour = { 22, 22, 22, 255 },
 
@@ -85,7 +83,9 @@ local DEFAULTS = {
 
     modules = {
         audio = false,
-        input = false
+        input = false,
+        graphics = false,
+        event = false
     }
 }
 
@@ -223,6 +223,12 @@ function Window:run()
     if _G.audio_registry then
         _G.audio_registry.root = self.root
     end
+    if _G.model_registry then
+        _G.model_registry.root = self.root
+    end
+    if _G.shader_registry then
+        _G.shader_registry.root = self.root
+    end
     call_hook(self, "on_ready")
 
     if self.start_scene then
@@ -254,6 +260,10 @@ function Window:run()
 
     call_hook(self, "on_close")
     self.scenes:unload()
+
+    if _G.environment then
+        _G.environment:free()
+    end
 
     if self.modules and self.modules.audio then
         _rl.CloseAudioDevice()

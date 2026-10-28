@@ -68,7 +68,7 @@ local draw_strategies = {
 
 --- @section Helpers
 
---- Draws one shape. Registered with the draw list as obj:render().
+--- Draws one shape.
 --- @param shape table Shape object
 local function render_shape(shape)
     if shape.draw_fn then

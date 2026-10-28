@@ -24,7 +24,7 @@ That should give a large amount of features already.
 - [x] Modding Support: sandboxed loading, `exports()` & `modit.event`
 - [x] Camera functions
 - [x] Graphics registries: image, text, shapes
-- [x] Layered draw list
+- [x] Layered render list
 - [x] Graphics API: Covers what currently works, nothing more
 - [x] Input controls: keyboard, mouse, gamepade & action bindings
 - [x] Audio basic but works
@@ -32,6 +32,7 @@ That should give a large amount of features already.
 - [] Fps Controller 
 - [] Networking
 - [] Headless server support
+- [] Ingame console
 
 ## License
 

@@ -224,3 +224,101 @@ Gets the total number of active shapes/splines in the current scene pool.
 * `shape:set_space(space)`
 * `shape:set_layer(layer)`
 * `shape:remove()`
+
+---
+
+## Models
+
+Load 3D models or create retained model instances. Requires a `mode = "3d"` camera.
+
+### `modit.graphics.load_model(path)`
+
+Loads a model from the project or retrieves it from cache.
+
+* **Parameters:**
+    * `path` (string): Model file path (`.glb`, `.gltf`, `.obj`, `.iqm`).
+
+* **Returns:**
+    * `table|nil`: Model asset handle, or `nil` if invalid.
+
+### `modit.graphics.cleanup_models()`
+
+Unloads every cached model.
+
+### `modit.graphics.new_model(config)`
+
+Creates a new retained model in the active scene.
+
+* **Parameters:**
+    * `config` (table): Configuration options:
+        * `path` (string): Model file path.
+        * `primitive` (string): `"cube"`, `"sphere"`, `"plane"` or `"cylinder"`. Unit sized, use `scale` to size them.
+        * `model` (table): Asset from `load_model`.
+        * `x`, `y`, `z` (number): Position coordinates.
+        * `position` (table): `{x, y, z}` position alternative.
+        * `rotation` (table): Euler degrees `{pitch, yaw, roll}`.
+        * `scale` (number|table): Uniform scale, or `{x, y, z}`.
+        * `tint`, `colour`, or `color` (string|table): Tint color.
+        * `owner` (string): Owner namespace, used to remove a mod's models when it unloads.
+
+* **Returns:**
+    * `table|nil`: Model object handle.
+
+```lua
+local crate = modit.graphics.new_model({ primitive = "cube", y = 0.5, rotation = { 0, 30, 0 } })
+```
+
+### Model Object Methods
+
+* `model:set_position(x, y, z)`
+* `model:get_position()`
+* `model:set_rotation(x, y, z)`
+* `model:set_scale(x, y, z)`
+* `model:set_colour(colour)`
+* `model:set_visible(visible)`
+* `model:get_bounds()`
+* `model:remove()`
+
+---
+
+## Shaders
+
+Load custom GLSL vertex/fragment shaders and manage shader uniforms.
+
+### `modit.graphics.load_shader(vs_path, fs_path)`
+
+Loads a shader from files or retrieves it from cache.
+
+* **Parameters:**
+    * `vs_path` (string|nil): Vertex shader file path.
+    * `fs_path` (string|nil): Fragment shader file path.
+* **Returns:**
+    * `table|nil`: Shader asset handle or `nil` if invalid.
+
+```lua
+local shader = modit.graphics.load_shader("assets/shaders/custom.vs", "assets/shaders/custom.fs")
+```
+
+### `modit.graphics.load_shader_from_memory(vs_code, fs_code, cache_key)`
+
+Loads a shader directly from code strings in memory.
+
+* **Parameters:**
+    * `vs_code` (string): Vertex shader code.
+    * `fs_code` (string): Fragment shader code.
+    * `cache_key` (string|nil): Optional cache key.
+
+* **Returns:**
+    * `table|nil`: Shader asset handle or `nil` if invalid.
+
+### `modit.graphics.cleanup_shaders()`
+
+Unloads and cleans up all cached shaders.
+
+### Shader Asset Methods
+
+* `shader:get_location(uniform_name)`
+* `shader:set_value(loc_index, value, uniform_type)`
+* `shader:set_matrix(loc_index, matrix)`
+* `shader:set_texture(loc_index, texture)`
+* `shader:unload()`

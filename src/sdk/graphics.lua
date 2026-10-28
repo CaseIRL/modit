@@ -1,6 +1,6 @@
 --- @module sdk.graphics
 --- @file src/sdk/graphics.lua
---- @description Graphics handling; shapes, splines, and visual primitives.
+--- @description Graphics and environment handling.
 --- @default_access mod
 --- @default_realm client
 
@@ -8,6 +8,15 @@
 
 local _camera = require("src.renderer.camera")
 local m = {}
+
+--- Helper to get the global environment container.
+local function get_environment()
+    if not _G.environment then
+        log("warn", "Environment not initialized")
+        return nil
+    end
+    return _G.environment
+end
 
 --- @section Camera
 
@@ -127,6 +136,150 @@ function m.get_shape_count()
         count = count + 1
     end
     return count
+end
+
+--- @section Models
+
+--- Loads a model from the project, or retrieves it from cache via the global model registry.
+--- @param path string Model file path
+--- @return table|nil ModelAsset handle or nil if invalid
+function m.load_model(path)
+    if not _G.model_registry then
+        log("warn", "ModelRegistry not initialized")
+        return nil
+    end
+    return _G.model_registry:load_model(path)
+end
+
+--- Unloads every cached model. Instances still using one stop drawing.
+function m.cleanup_models()
+    if _G.model_registry then
+        _G.model_registry:cleanup_models()
+    end
+end
+
+--- Creates a new retained model in the active scene.
+--- Draws through the scene camera, so set a `mode = "3d"` camera with set_camera first.
+--- Rotation is euler degrees { pitch, yaw, roll }.
+--- Scale is a number or { x, y, z }.
+--- Primitives are unit sized ("cube", "sphere", "plane", "cylinder"), size them with scale.
+--- @param config table { path|primitive|model, x, y, z, position, rotation, scale, colour, cast_shadow, unlit, shader, owner }
+--- @return table|nil ModelObjectHandle
+function m.new_model(config)
+    if not _G.model_registry then
+        log("warn", "ModelRegistry not initialized")
+        return nil
+    end
+    return _G.model_registry:add(config)
+end
+
+--- @section Shaders
+
+--- Loads a shader from vertex and fragment files, or retrieves it from cache via the global shader registry.
+--- @param vs_path string|nil Vertex shader file path
+--- @param fs_path string|nil Fragment shader file path
+--- @return table|nil ShaderAsset handle or nil if invalid
+function m.load_shader(vs_path, fs_path)
+    if not _G.shader_registry then
+        log("warn", "ShaderRegistry not initialized")
+        return nil
+    end
+    return _G.shader_registry:load_shader(vs_path, fs_path)
+end
+
+--- Loads a shader from code strings in memory.
+--- @param vs_code string Vertex shader code string
+--- @param fs_code string Fragment shader code string
+--- @param cache_key string|nil Optional custom cache key
+--- @return table|nil ShaderAsset handle or nil if invalid
+function m.load_shader_from_memory(vs_code, fs_code, cache_key)
+    if not _G.shader_registry then
+        log("warn", "ShaderRegistry not initialized")
+        return nil
+    end
+    return _G.shader_registry:load_shader_from_memory(vs_code, fs_code, cache_key)
+end
+
+--- Unloads every cached shader from VRAM.
+function m.cleanup_shaders()
+    if _G.shader_registry then
+        _G.shader_registry:cleanup_shaders()
+    end
+end
+
+--- @section Lighting, Sky & Environment
+
+--- Turns lighting on or off. Off draws models with their own flat materials.
+--- Only applies to scenes with a `mode = "3d"` camera.
+--- @param enabled boolean
+function m.set_lighting(enabled)
+    local env = get_environment()
+    if env then env:set_lighting(enabled) end
+end
+
+--- Sets the sun direction (the way the light travels) and colour.
+--- The direction is normalised and kept pointing downward.
+--- @param dx number Direction X
+--- @param dy number Direction Y, should be negative
+--- @param dz number Direction Z
+--- @param r number|nil Red 0-255 (default 255)
+--- @param g number|nil Green 0-255 (default 255)
+--- @param b number|nil Blue 0-255 (default 255)
+function m.set_sun(dx, dy, dz, r, g, b)
+    local env = get_environment()
+    if env then env:set_sun(dx, dy, dz, r, g, b) end
+end
+
+--- Sets the ambient light colour, the light on faces the sun doesn't reach.
+--- @param r number Red 0-255
+--- @param g number Green 0-255
+--- @param b number Blue 0-255
+function m.set_ambient(r, g, b)
+    local env = get_environment()
+    if env then env:set_ambient(r, g, b) end
+end
+
+--- Sets distance fog. Without a colour the fog follows the sky horizon.
+--- @param near number Distance where fog starts
+--- @param far number Distance where fog is solid
+--- @param r number|nil Red 0-255
+--- @param g number|nil Green 0-255
+--- @param b number|nil Blue 0-255
+function m.set_fog(near, far, r, g, b)
+    local env = get_environment()
+    if env then env:set_fog(near, far, r, g, b) end
+end
+
+--- Sets the sky gradient: top colour fading to the horizon colour, solid below the horizon.
+--- @param tr number Top red 0-255
+--- @param tg number Top green 0-255
+--- @param tb number Top blue 0-255
+--- @param hr number Horizon red 0-255
+--- @param hg number Horizon green 0-255
+--- @param hb number Horizon blue 0-255
+function m.set_sky(tr, tg, tb, hr, hg, hb)
+    local env = get_environment()
+    if env then env:set_sky(tr, tg, tb, hr, hg, hb) end
+end
+
+--- Removes the sky, the window clear colour shows instead.
+function m.clear_sky()
+    local env = get_environment()
+    if env then env:clear_sky() end
+end
+
+--- Sets the shadow mode and its options. Models opt out with `cast_shadow = false`.
+--- "map" is the best looking and also receives shadows on lit models, "projected" flattens casters onto the ground plane, "blob" draws a soft disc under each caster.
+--- @param config table { mode = "off" | "blob" | "projected" | "map", strength = 0-1, range = world units covered by "map", size = shadow map pixels, ground = world Y for "projected" and "blob" }
+function m.set_shadows(config)
+    local env = get_environment()
+    if env then env:set_shadows(config) end
+end
+
+--- Restores every environment setting to its default.
+function m.reset_environment()
+    local env = get_environment()
+    if env then env:reset() end
 end
 
 return m
