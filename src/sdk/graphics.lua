@@ -6,7 +6,7 @@
 
 --- @section Initialisation
 
-local _camera = require("src.renderer.camera")
+local _camera = require("src.framework.renderer.camera")
 local m = {}
 
 --- Helper to get the global environment container.
@@ -171,6 +171,49 @@ function m.new_model(config)
         return nil
     end
     return _G.model_registry:add(config)
+end
+
+--- Builds a custom model from raw vertices and normals, caching it in the model registry.
+--- @param opts table { key, vertices, normals, ... }
+--- @return table|nil ModelAsset handle or nil if invalid
+function m.build_model(opts)
+    if not _G.model_registry then
+        log("warn", "ModelRegistry not initialized")
+        return nil
+    end
+    return _G.model_registry:build(opts)
+end
+
+--- Creates a managed GPU-instanced bulk render object in the active scene.
+--- Instances are tables { x, y, z, scale (number or {x,y,z}), colour, rx, ry, rz } with Euler degrees, or
+--- { qx, qy, qz, qw } for a quaternion (Body:write_render_transform fills that in). Colour is per instance.
+--- Every mesh of the model is drawn, the object casts and receives shadows and is frustum culled when lit.
+--- Handle methods: set_instances(instances, count), set_count(n), get_count(), set_colour(c), set_visible(b),
+--- set_cast_shadow(b), set_cull(b), remove().
+--- @param config table { key|primitive|path|model, instances, count, colour, cast_shadow, cull, layer }
+--- @return table|nil BulkObjectHandle
+function m.new_bulk(config)
+    if not _G.model_registry then
+        log("warn", "ModelRegistry not initialized")
+        return nil
+    end
+    return _G.model_registry:add_bulk(config)
+end
+
+--- Draws many instances of a model or primitive in bulk using GPU instancing.
+--- @param key_or_asset string|table Model path, primitive name, or loaded asset handle
+--- @param instances table Array of instance tables ({ x, y, z, rx, ry, rz | qx, qy, qz, qw, scale, colour })
+--- @param count number|nil Number of instances to draw
+--- @param camera table|nil Camera object, enables frustum culling
+--- @param colour table|nil Colour for instances without their own
+--- @param uniform boolean|nil Ignored, colour is always per instance
+--- @return boolean ok
+function m.draw_bulk(key_or_asset, instances, count, camera, colour, uniform)
+    if not _G.model_registry then
+        log("warn", "ModelRegistry not initialized")
+        return false
+    end
+    return _G.model_registry:draw_bulk(key_or_asset, instances, count, camera, colour, uniform)
 end
 
 --- @section Shaders

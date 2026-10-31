@@ -16,7 +16,6 @@
 
 local scene = {}
 
-
 --- Load whatever your game needs here
 function scene:load()
 

@@ -35,14 +35,12 @@ end
 
 --- Update things here; dt = deltatime
 function scene:update(dt)
-    local input = modit.input
-
-    if input.key_down("a") then self.angle = self.angle - 1.5 * dt end
-    if input.key_down("d") then self.angle = self.angle + 1.5 * dt end
-    if input.key_down("w") then self.distance = math.max(3, self.distance - 6 * dt) end
-    if input.key_down("s") then self.distance = math.min(30, self.distance + 6 * dt) end
-    if input.key_down("q") then self.fov = math.max(20, self.fov - 30 * dt) end
-    if input.key_down("e") then self.fov = math.min(110, self.fov + 30 * dt) end
+    if modit.input.key_down("a") then self.angle = self.angle - 1.5 * dt end
+    if modit.input.key_down("d") then self.angle = self.angle + 1.5 * dt end
+    if modit.input.key_down("w") then self.distance = math.max(3, self.distance - 6 * dt) end
+    if modit.input.key_down("s") then self.distance = math.min(30, self.distance + 6 * dt) end
+    if modit.input.key_down("q") then self.fov = math.max(20, self.fov - 30 * dt) end
+    if modit.input.key_down("e") then self.fov = math.min(110, self.fov + 30 * dt) end
 
     -- Orbit: place the camera on a circle around the target and look at it
     self.camera:set_position(math.cos(self.angle) * self.distance, 5, math.sin(self.angle) * self.distance)

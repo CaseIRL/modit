@@ -5,9 +5,9 @@
 
 --- @section Imports
 
-local _keyboard = require("src.input.keyboard")
-local _mouse = require("src.input.mouse")
-local _gamepad = require("src.input.gamepad")
+local _keyboard = require("src.framework.input.keyboard")
+local _mouse = require("src.framework.input.mouse")
+local _gamepad = require("src.framework.input.gamepad")
 
 --- @section Constants
 
@@ -321,6 +321,18 @@ function m.mouse_in_rect(x, y, w, h)
     local mx, my = _mouse.get_position()
 
     return mx >= x and mx < x + w and my >= y and my < y + h
+end
+
+--- Lock the mouse cursor to the window and hide it.
+--- @access game
+function m.lock_cursor()
+    _mouse.lock_cursor()
+end
+
+--- Unlock the mouse cursor.
+--- @access game
+function m.unlock_cursor()
+    _mouse.unlock_cursor()
 end
 
 --- Set the mouse cursor position.

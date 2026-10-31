@@ -29,9 +29,7 @@ return {
     --- @section Modules
 
     modules = {
-        audio = true, -- Enables both Raylibs InitAudioDevice and modit audio module 
         input = true, -- Enables mouse, keyboard, gamepad and action bindings
         graphics = true, -- Enables 2D/3D graphics; shapes, models, lighting, shadows
-        event = false, -- Enables event system so games can register events to communicate with itself or mods
     },
 }

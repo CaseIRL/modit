@@ -28,11 +28,11 @@ That should give a large amount of features already.
 - [x] Graphics API: Covers what currently works, nothing more
 - [x] Input controls: keyboard, mouse, gamepade & action bindings
 - [x] Audio basic but works
-- [] Physics: basic at first only need rigid bodies to explode
-- [] Fps Controller 
-- [] Networking
-- [] Headless server support
-- [] Ingame console
+- [_] Physics: basic at first only need rigid bodies to explode
+- [x] Fps Controller 
+- [_] Networking
+- [_] Headless server support
+- [x] Ingame console
 
 ## License
 

@@ -6,8 +6,8 @@
 
 --- @section Imports
 
-local _log = require("src.core.log")
-local _utils = require("src.core.utils")
+local _log = require("src.framework.core.log")
+local _utils = require("src.framework.core.utils")
 
 --- @section Initialisation
 

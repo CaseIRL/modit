@@ -24,8 +24,8 @@ return {
 
     width = 1280, -- Window width
     height = 720, -- Window height
-    title = "Modit Demo", -- Window title
-    icon = "assets/images/modit_icon_32x32.png", -- Window icon path relative to your project
+    title = "Modit Project", -- Window title
+    icon = "", -- Window icon path relative to your project
     root = ".", -- Project root directory
 
     vsync = false, -- VSync enabled
@@ -66,12 +66,38 @@ return {
         }
     },
 
+    --- @section Console
+
+    console = {
+        enabled = false, -- Enables client side console opened with F8 by default; used for logs + commands
+        font = "" -- Path to your font, falls back to default if not included
+    },
+
+    --- @section Network
+
+    network = {
+        console = true, -- Enable the headless server console
+        tick_rate = 30, -- Server tick rate
+        port = 7777 -- Server port
+    },
+
+    --- @section Network
+
+    network = {
+        console = true, -- Enable the headless server console
+        tick_rate = 30, -- Server tick rate
+        port = 7777 -- Server port
+    },
+
     --- @section Modules
 
     modules = {
-        audio = false, -- Enables both Raylibs InitAudioDevice and modit audio module 
-        input = false, -- Enables mouse, keyboard, gamepad and action bindings
-        graphics = false, -- Enables 2D/3D graphics; shapes, models, lighting, shadows
-        event = false, -- Enabled event system so games can register events to communicate with itself or mods
+        audio = true, -- Enables both Raylibs InitAudioDevice and modit audio module 
+        input = true, -- Enables mouse, keyboard, gamepad and action bindings
+        graphics = true, -- Enables 2D/3D graphics; shapes, models, lighting, shadows
+        event = true, -- Enabled event system so games can register events to communicate with itself or mods
+        command = true, -- Enables command system to register/run console commands
+        physics = true, -- Enables physics system make sure to create a physics world
+        network = true -- Enables the network module, mostly basic just wraps Enet
     },
 }
