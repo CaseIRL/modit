@@ -181,6 +181,36 @@ local function read_file(path)
     return _fs.read_file(path)
 end
 
+--- Lists a directory's direct children from the bundle if present, falling back to disk.
+--- Needed because a packaged exe has no real src/api folder on disk - only MODIT_BUNDLE
+--- knows about it - so scan_api's directory walk has to go through this, not _fs directly.
+--- @param path string Directory path
+--- @return table Array of full child paths
+local function list_directory(path)
+    local bundle = rawget(_G, "MODIT_BUNDLE")
+    if bundle then
+        local key = path:gsub("\\", "/"):gsub("^%./", ""):gsub("/+$", "")
+        if bundle.is_dir(key) then
+            return bundle.list(key)
+        end
+    end
+    return _fs.list_directory(path)
+end
+
+--- Checks whether a directory exists in the bundle if present, falling back to disk.
+--- @param path string Directory path
+--- @return boolean
+local function directory_exists(path)
+    local bundle = rawget(_G, "MODIT_BUNDLE")
+    if bundle then
+        local key = path:gsub("\\", "/"):gsub("^%./", ""):gsub("/+$", "")
+        if bundle.is_dir(key) then
+            return true
+        end
+    end
+    return _fs.directory_exists(path)
+end
+
 --- Reads the source code for a module from path.
 --- @param path string File path
 --- @return string Source code
@@ -214,7 +244,7 @@ end
 --- @return table Array of file paths
 local function collect_lua_files(dir, out)
     local entries = {}
-    for _, entry in ipairs(_fs.list_directory(dir) or {}) do
+    for _, entry in ipairs(list_directory(dir) or {}) do
         if type(entry) == "string" then
             entries[#entries + 1] = entry
         end
@@ -224,7 +254,7 @@ local function collect_lua_files(dir, out)
     for _, entry in ipairs(entries) do
         if entry:match("%.lua$") then
             out[#out + 1] = entry
-        elseif _fs.directory_exists(entry) then
+        elseif directory_exists(entry) then
             collect_lua_files(entry, out)
         end
     end
@@ -232,21 +262,21 @@ local function collect_lua_files(dir, out)
 end
 
 --- Scans the API directory to build the manifest.
---- @param sdk_dir string|nil Optional API directory path
-local function scan_sdk(sdk_dir)
-    sdk_dir = sdk_dir or "src/sdk"
+--- @param api_dir string|nil Optional API directory path
+local function scan_api(api_dir)
+    api_dir = api_dir or "src/api"
     scanned = true
 
-    if not _fs.directory_exists(sdk_dir) then
+    if not directory_exists(api_dir) then
         return
     end
 
     clear_manifest()
 
-    for _, filepath in ipairs(collect_lua_files(sdk_dir, {})) do
+    for _, filepath in ipairs(collect_lua_files(api_dir, {})) do
         local code = read_file(filepath)
         if code then
-            local module_name = code:match("%-%-%s*@module%s+sdk%.([%w_]+)")
+            local module_name = code:match("%-%-%s*@module%s+api%.([%w_]+)")
             local realm = code:match("%-%-%s*@default_realm%s+(%w+)")
 
             if module_name and realm then
@@ -311,7 +341,7 @@ local function load_realm(realm)
     end
 
     if not scanned then
-        scan_sdk()
+        scan_api()
     end
 
     local modules = {}
@@ -429,7 +459,7 @@ local function make_require(root, env)
         local rel = name:gsub("%.", "/")
         local path, code
         for _, candidate in ipairs({ root .. "/" .. rel .. ".lua", root .. "/" .. rel .. "/init.lua" }) do
-            code = _fs.read_file(candidate)
+            code = read_file(candidate)
             if code then
                 path = candidate
                 break
@@ -461,7 +491,7 @@ end
 local function load_config(project_path)
     local path = project_path .. "/config.lua"
 
-    local code = _fs.read_file(path)
+    local code = read_file(path)
     if not code then
         return nil, "config.lua not found in '" .. project_path .. "'"
     end
@@ -649,12 +679,12 @@ function m.create_env(realm, role, conf, opts)
         for name, mod in pairs(load_realm(realm)) do
             local scoped = mod.exports.scoped
             if type(scoped) == "function" and is_enabled(name, enabled_modules) then
-                local sdk = scoped(opts.scope.owner, opts.scope.root)
-                if type(sdk) == "table" then
+                local api = scoped(opts.scope.owner, opts.scope.root)
+                if type(api) == "table" then
                     if type(modules[name]) ~= "table" then
                         modules[name] = {}
                     end
-                    for k, v in pairs(sdk) do
+                    for k, v in pairs(api) do
                         modules[name][k] = v
                     end
                 end

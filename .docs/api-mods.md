@@ -1,6 +1,6 @@
-# Mods SDK Reference
+# Mods API Reference
 
-The Mods SDK handles cross-mod communication via exports and provides utility functions to query loaded mods.
+The Mods API handles cross-mod communication via exports and provides utility functions to query loaded mods.
 
 ---
 

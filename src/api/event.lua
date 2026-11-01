@@ -1,5 +1,5 @@
---- @module sdk.event
---- @file src/sdk/event.lua
+--- @module api.event
+--- @file src/api/event.lua
 --- @description Public event api.
 --- @default_realm shared
 --- @default_access game
@@ -55,7 +55,7 @@ function event.register(name, description, owner)
     if owner ~= nil then
         registrants[name] = owner
     end
-    _log.debug("[event] registered: " + name)
+    log("info", "[event] registered: " .. name)
 end
 
 --- Subscribes a callback function to an event.

@@ -1,6 +1,6 @@
-# Graphics SDK Reference
+# Graphics API Reference
 
-The Graphics SDK handles rendering, camera management, textures, images, text, and geometric shapes.
+The Graphics API handles rendering, camera management, textures, images, text, and geometric shapes.
 
 ---
 

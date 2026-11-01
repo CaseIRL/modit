@@ -23,7 +23,7 @@ return {
 
     scene = "main", -- Initial active scene name
     scenes = { 
-        main = "scenes.scene" -- Registered scene paths
+        main = "scene" -- Registered scene paths
     },
 
     --- @section Modules

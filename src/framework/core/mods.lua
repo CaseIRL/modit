@@ -7,17 +7,17 @@
 local _log = require("src.framework.core.log")
 local _fs = require("src.framework.core.filesystem")
 local _sandbox = require("src.framework.core.sandbox")
-local _event = require("src.sdk.event")
-local _mods = require("src.sdk.mods")
+local _event = require("src.api.event")
+local _mods = require("src.api.mods")
 
 --- @section Constants
 
-local SDK_VERSION = "0.1.0"
+local API_VERSION = "0.1.0"
 local REALMS = { client = true, server = true }
 local POLL_INTERVAL = 0.25
-local SCALARS = { "modit_sdk", "name", "label", "description", "author", "version", "license" }
+local SCALARS = { "modit_api", "name", "label", "description", "author", "version", "license" }
 local LISTS = { "depends", "provides", "assets", "shared", "client", "server" }
-local REQUIRED = { "modit_sdk", "name", "version" }
+local REQUIRED = { "modit_api", "name", "version" }
 local FILE_LISTS = { "shared", "client", "server" }
 
 --- @section Initialisation
@@ -335,8 +335,8 @@ local function validate_manifest(manifest, folder)
         end
     end
 
-    if manifest.modit_sdk ~= SDK_VERSION then
-        return ("unsupported modit_sdk %s (expected %s)"):format(manifest.modit_sdk, SDK_VERSION)
+    if manifest.modit_api ~= API_VERSION then
+        return ("unsupported modit_api %s (expected %s)"):format(manifest.modit_api, API_VERSION)
     end
 
     if not is_valid_id(manifest.name) then

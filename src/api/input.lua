@@ -1,5 +1,5 @@
---- @module sdk.input
---- @file src/sdk/input.lua
+--- @module api.input
+--- @file src/api/input.lua
 --- @description Keyboard, mouse, gamepad and actions.
 --- @default_realm client
 

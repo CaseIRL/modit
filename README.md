@@ -1,11 +1,11 @@
-# Modit SDK
+# Modit API
 
 A small lightweight game framework built with LuaJIT + Raylib + Box3D.
 
 A lot of code for project has already been completed in a multitude of other builds and test projects.
 However I have decided to go for a rebuild on this and just keep it focused to what I need to build games I want to make. 
 
-I am planning to use the engine/sdk to make my own game, then when I come to game 2 if Modit needs anything adding it will be added then.
+I am planning to use the engine/api to make my own game, then when I come to game 2 if Modit needs anything adding it will be added then.
 This is to try keep the project more focused into whats needed instead of building features because it sounds cool to build.
 
 My first plan is a fps arena shooter multiplayer with mod support. 

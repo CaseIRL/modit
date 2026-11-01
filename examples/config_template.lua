@@ -8,7 +8,7 @@
 
     Important stuff:
     
-    icon: is relative to your project, not to the sdk
+    icon: is relative to your project, not to the api
     root: can be skipped unless you want to put files somewhere specific
     draw_fps: draws with default raylib settings
     target_fps: works like a FPS cap it's the target your game should reach; false = uncapped
@@ -61,7 +61,7 @@ return {
     modding = {
         enabled = false, -- Enabled modding support for project; make sure to enable & use `modit.event` so mods can communicate with game
         blacklisted_modules = {
-            -- List any SDK modules you want to restrict from mods here, e.g.:
+            -- List any API modules you want to restrict from mods here, e.g.:
             -- "audio"
         }
     },
@@ -71,14 +71,6 @@ return {
     console = {
         enabled = false, -- Enables client side console opened with F8 by default; used for logs + commands
         font = "" -- Path to your font, falls back to default if not included
-    },
-
-    --- @section Network
-
-    network = {
-        console = true, -- Enable the headless server console
-        tick_rate = 30, -- Server tick rate
-        port = 7777 -- Server port
     },
 
     --- @section Network

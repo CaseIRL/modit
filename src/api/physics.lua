@@ -1,5 +1,5 @@
---- @module sdk.physics
---- @file src/sdk/physics.lua
+--- @module api.physics
+--- @file src/api/physics.lua
 --- @description Rigid body physics: worlds, bodies, shapes, joints, queries and explosions, all created from config tables.
 --- @default_access game
 --- @default_realm shared

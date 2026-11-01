@@ -4,7 +4,7 @@
     -------------------------
 
     Basic environment example scene: sun, ambient, sky, fog, lighting and shadows.
-    Everything here goes through the graphics SDK and only applies to 3D camera scenes.
+    Everything here goes through the graphics API and only applies to 3D camera scenes.
 
     Things are subject to change so develop with this in mind.
 ]]

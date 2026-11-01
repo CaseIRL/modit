@@ -1,6 +1,6 @@
-# Physics SDK Reference
+# Physics API Reference
 
-The Physics SDK handles 3D rigid body simulation, shapes, joints, spatial queries, and explosion physics using config tables.
+The Physics API handles 3D rigid body simulation, shapes, joints, spatial queries, and explosion physics using config tables.
 
 ---
 

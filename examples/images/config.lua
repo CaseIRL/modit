@@ -9,7 +9,7 @@ return {
     width = 1280, -- Window width
     height = 720, -- Window height
     title = "Modit Example - Images", -- Window title
-    icon = "assets/images/modit_icon_32x32.png", -- Window icon path
+    icon = "assets/images/mod_logo.png", -- Window icon path
     root = ".", -- Project root directory
 
     vsync = true, -- VSync enabled

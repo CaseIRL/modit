@@ -57,7 +57,11 @@ _ffi.cdef[[
 
 local ok, lib = pcall(_ffi.load, "vendor/enet/enet.dll")
 if not ok then
-    error("enet library not found (enet.dll / libenet.so next to the executable): " .. tostring(lib))
+    local err = lib
+    ok, lib = pcall(_ffi.load, "enet")
+    if not ok then
+        error("enet library not found (enet.dll / libenet.so next to the executable): " .. tostring(err) .. "\n" .. tostring(lib), 0)
+    end
 end
 
 --- @section Constants

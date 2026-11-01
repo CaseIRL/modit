@@ -13,7 +13,30 @@ local m = {}
 
 --- @section Colours
 
-m.colour = _ffi.typeof("Color")
+local _colour_type
+
+--- Looks up raylib's Color ctype on first actual use.
+--- @return cdata ctype Callable Color constructor
+local function colour_type()
+    if _colour_type == nil then
+        local ok, result = pcall(_ffi.typeof, "Color")
+        if not ok then
+            error("utils.colour/resolve_colour need raylib's Color type, which isn't loaded in this realm (likely the headless server)", 0)
+        end
+        _colour_type = result
+    end
+    return _colour_type
+end
+
+--- Constructs a raylib Color. Same call shape as the old ffi.typeof("Color") result.
+--- @param r number|nil Red value
+--- @param g number|nil Green value
+--- @param b number|nil Blue value
+--- @param a number|nil Alpha value
+--- @return userdata Color cdata
+function m.colour(r, g, b, a)
+    return colour_type()(r, g, b, a)
+end
 m.color = m.colour
 
 --- Resolves input into a raylib Color cdata.
@@ -32,7 +55,7 @@ function m.resolve_colour(r_or_tbl, g, b, a)
         return m.colour(r_or_tbl or 255, g or 255, b or 255, a or 255)
     end
 end
-m.resolve_color = resolve_colour
+m.resolve_color = m.resolve_colour
 
 --- @section Safe Call
 

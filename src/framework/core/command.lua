@@ -1,5 +1,5 @@
 --- @module command
---- @file src/sdk/shared/command.lua
+--- @file src/api/shared/command.lua
 --- @description Console command registry with engine, game, and mod layers, pure options-table support, and built-ins.
 
 --- @section Initialisation
@@ -158,7 +158,7 @@ function m.register_builtins(realm, opts)
     -- Mod management engine command (opt-in if modding is supported)
     if opts.mods == true then
         local _mods = require("src.framework.core.mods")
-        local _public = require("src.sdk.mods")
+        local _public = require("src.api.mods")
 
         m.register_engine({
             name = "mods",

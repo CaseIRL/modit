@@ -1,6 +1,6 @@
-# Event SDK Reference
+# Event API Reference
 
-The Event SDK provides an extension and messaging system, allowing games to register, listen to, fire, and manage custom events.
+The Event API provides an extension and messaging system, allowing games to register, listen to, fire, and manage custom events.
 
 ---
 

@@ -1,5 +1,5 @@
---- @module sdk.graphics
---- @file src/sdk/graphics.lua
+--- @module api.graphics
+--- @file src/api/graphics.lua
 --- @description Graphics and environment handling.
 --- @default_access mod
 --- @default_realm client

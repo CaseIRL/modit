@@ -1,5 +1,5 @@
---- @module sdk.mods
---- @file src/sdk/mods.lua
+--- @module api.mods
+--- @file src/api/mods.lua
 --- @description Mod registry and cross-mod exports.
 --- @default_realm shared
 

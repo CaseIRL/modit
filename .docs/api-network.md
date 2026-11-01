@@ -1,6 +1,6 @@
-# Network SDK Reference
+# Network API Reference
 
-The Network SDK handles low-level and high-level networking over ENet, allowing games and mods to create servers, connect clients, and manage named reliable or unreliable communication channels.
+The Network API handles low-level and high-level networking over ENet, allowing games and mods to create servers, connect clients, and manage named reliable or unreliable communication channels.
 
 ---
 

@@ -26,6 +26,13 @@ return {
         main = "scenes.scene" -- Registered scene paths
     },
 
+    --- @section Console
+
+    console = {
+        enabled = true, -- Enables client side console opened with F8 by default; used for logs + commands
+        font = "" -- Path to your font, falls back to default if not included
+    },
+
     --- @section Modules
 
     modules = {

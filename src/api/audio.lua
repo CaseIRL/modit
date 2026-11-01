@@ -1,6 +1,6 @@
---- @module sdk.audio
---- @file src/sdk/audio.lua
---- @description Audio SDK for loading and playing sounds and music streams.
+--- @module api.audio
+--- @file src/api/audio.lua
+--- @description Audio API for loading and playing sounds and music streams.
 --- @default_access mod
 --- @default_realm client
 

@@ -1,5 +1,5 @@
---- @module sdk.command
---- @file src/sdk/command.lua
+--- @module api.command
+--- @file src/api/command.lua
 --- @description Console commands. Games register their own, mods register scoped to their name.
 --- @default_access engine
 --- @default_realm shared

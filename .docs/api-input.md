@@ -1,6 +1,6 @@
-# Input SDK Reference
+# Input API Reference
 
-The Input SDK handles keyboard, mouse, gamepad states, clipboard operations, and action mapping.
+The Input API handles keyboard, mouse, gamepad states, clipboard operations, and action mapping.
 
 ---
 

@@ -21,23 +21,23 @@ function scene:load()
     modit.graphics.set_camera(self.camera)
 
     -- Loading image type
-    self.img_point = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 60, y = 120, scale = 0.64 })
+    self.img_point = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 60, y = 120, scale = 0.64 })
     self.txt_point = modit.graphics.new_text({ text = "point", x = 60, y = 260, colour = { 160, 170, 185, 255 } })
-    self.img_bilinear = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 220, y = 120, scale = 0.64, filter = "bilinear" })
+    self.img_bilinear = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 220, y = 120, scale = 0.64, filter = "bilinear" })
     self.txt_bilinear = modit.graphics.new_text({ text = "bilinear", x = 220, y = 260, colour = { 160, 170, 185, 255 } })
-    self.img_tint = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 380, y = 120, scale = 0.64, tint = { 255, 110, 110, 255 }, flip_x = true })
+    self.img_tint = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 380, y = 120, scale = 0.64, tint = { 255, 110, 110, 255 }, flip_x = true })
     self.txt_tint = modit.graphics.new_text({ text = "tint + flip", x = 380, y = 260, colour = { 160, 170, 185, 255 } })
-    self.img_size = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 540, y = 120, width = 128, height = 128 })
+    self.img_size = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 540, y = 120, width = 128, height = 128 })
     self.txt_size = modit.graphics.new_text({ text = "width/height", x = 540, y = 260, colour = { 160, 170, 185, 255 } })
-    self.spinner = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 880, y = 184, scale = 0.64, origin = { 100, 100 } })
+    self.spinner = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 880, y = 184, scale = 0.64, origin = { 100, 100 } })
     self.txt_spinner = modit.graphics.new_text({ text = "origin + rotation", x = 810, y = 260, colour = { 160, 170, 185, 255 } })
-    self.img_layer1 = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 1010, y = 120, scale = 0.64, layer = 1, tint = { 255, 200, 90, 255 } })
-    self.img_layer2 = modit.graphics.new_image({ path = "assets/images/modit_icon_200x200.png", x = 1050, y = 150, scale = 0.64, layer = 2, tint = { 110, 160, 255, 255 } })
+    self.img_layer1 = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 1010, y = 120, scale = 0.64, layer = 1, tint = { 255, 200, 90, 255 } })
+    self.img_layer2 = modit.graphics.new_image({ path = "assets/images/mod_logo.png", x = 1050, y = 150, scale = 0.64, layer = 2, tint = { 110, 160, 255, 255 } })
     self.txt_layers = modit.graphics.new_text({ text = "layer 2 over 1", x = 1010, y = 260, colour = { 160, 170, 185, 255 } })
 
     -- Loading a sprite
     self.character = modit.graphics.new_image({
-        path = SHEET,
+        path = "assets/images/rpg_base_character_16.png",
         x = 0,
         y = 0,
         scale = 8,

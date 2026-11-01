@@ -210,7 +210,7 @@ function Window:run()
     
     local input
     if self.modules and self.modules.input then
-        input = require("src.sdk.input")
+        input = require("src.api.input")
     end
 
     self.running = true

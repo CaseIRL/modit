@@ -1,6 +1,6 @@
-# Command SDK Reference
+# Command API Reference
 
-The Command SDK provides methods for registering, scoping, and managing console commands.
+The Command API provides methods for registering, scoping, and managing console commands.
 
 ---
 

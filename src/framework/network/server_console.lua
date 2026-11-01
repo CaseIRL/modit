@@ -337,7 +337,6 @@ end
 --- @return number|cdata result Message result
 local function window_proc(hwnd, message, wparam, lparam)
     if message == WM_CLOSE then
-        print("[console] WM_CLOSE received\n" .. debug.traceback())
         m.closed = true
         _user32.DestroyWindow(hwnd)
         return 0

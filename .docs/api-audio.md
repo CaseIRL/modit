@@ -1,6 +1,6 @@
-# Audio SDK Reference
+# Audio API Reference
 
-The Audio SDK provides methods for loading, playing, and managing sound effects and music streams.
+The Audio API provides methods for loading, playing, and managing sound effects and music streams.
 
 ---
 

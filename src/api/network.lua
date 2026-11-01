@@ -1,5 +1,5 @@
---- @module sdk.network
---- @file src/sdk/network.lua
+--- @module api.network
+--- @file src/api/network.lua
 --- @description Networking: servers and clients over ENet, with named reliable and unreliable channels.
 --- @default_access game
 --- @default_realm shared
